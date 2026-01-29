@@ -11,10 +11,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private var permissionRequest: PermissionRequest? = null
 
     companion object {
@@ -32,8 +34,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webView)
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout)
         setupWebView()
-        
+        setupSwipeRefresh()
+
         // Vue.js 개발 서버 로드
         webView.loadUrl(DEV_URL)
     }
@@ -80,7 +84,8 @@ class MainActivity : AppCompatActivity() {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    // 페이지 로드 완료
+                    // 페이지 로드 완료 - 새로고침 인디케이터 숨김
+                    swipeRefreshLayout.isRefreshing = false
                 }
 
                 override fun onReceivedError(
@@ -186,6 +191,23 @@ class MainActivity : AppCompatActivity() {
 
             // 오버스크롤 비활성화
             overScrollMode = View.OVER_SCROLL_NEVER
+        }
+    }
+
+    private fun setupSwipeRefresh() {
+        swipeRefreshLayout.apply {
+            // 새로고침 시 WebView 리로드
+            setOnRefreshListener {
+                webView.reload()
+            }
+
+            // 새로고침 인디케이터 색상 설정
+            setColorSchemeResources(
+                android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light
+            )
         }
     }
 
